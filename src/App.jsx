@@ -1,44 +1,44 @@
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import Bookings from "./pages/Bookings";
+import Cabins from "./pages/Cabins";
+import Users from "./pages/Users";
+import Settings from "./pages/Settings";
+import Login from "./pages/Login";
+import Account from "./pages/Account";
+import PageNotFound from "./pages/PageNotFound";
+import Error from "./ui/Error";
+import AppLayout from "./ui/AppLayout";
 import GlobalStyles from "./styles/GlobalStyles";
-import Button from "./ui/Button";
-import Input from "./ui/Input";
-import Heading from "./ui/Heading";
-import Row from "./ui/Row";
-import styled from "styled-components";
 
-const StyledApp = styled.div`
-  padding: 20px;
-`;
+const router = createBrowserRouter([
+  {
+    element: <AppLayout />,
+    errorElement: <Error />,
+    children: [
+      { path: "/", element: <Navigate to="/dashboard" /> },
+      { path: "/dashboard", element: <Dashboard /> },
+      { path: "/bookings", element: <Bookings /> },
+      { path: "/cabins", element: <Cabins /> },
+      { path: "/users", element: <Users /> },
+      { path: "/settings", element: <Settings /> },
+      { path: "/account", element: <Account /> },
+    ],
+  },
+  { path: "/login", element: <Login /> },
+  { path: "*", element: <PageNotFound /> },
+]);
 
 function App() {
   return (
-    <div>
-      <>
-        <GlobalStyles />
-        <StyledApp>
-          <Row>
-            <Row type="horizontal">
-              <Heading as="h1">The Wild Oasis</Heading>
-              <div>
-                <Heading as="h2">Admin Page</Heading>
-                <Button size="medium" variation="primary">
-                  Check In
-                </Button>
-                <Button size="medium" variation="secondary">
-                  Check Out
-                </Button>
-              </div>
-            </Row>
-            <Row>
-              <Heading as="h3">Form</Heading>
-              <div>
-                <Input placeholder="Type here..."></Input>
-                <Input placeholder="Type here..." />
-              </div>
-            </Row>
-          </Row>
-        </StyledApp>
-      </>
-    </div>
+    <>
+      <GlobalStyles />
+      <RouterProvider router={router} />
+    </>
   );
 }
 
