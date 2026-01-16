@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, getValues } from "@tanstack/react-query";
 import { createCabin } from "../../services/apiCabins.js";
 import toast from "react-hot-toast";
 import styled from "styled-components";
@@ -65,16 +65,38 @@ function CreateCabinForm() {
     mutate(data);
   };
 
+  const onError = (errors) => {
+    const message = Object.values(errors)
+      .map((error) => error.message)
+      .join("\n ");
+    // const firstError = Object.values(errors)[0];
+    // toast.error(firstError.message);
+    toast.error(message);
+  };
+
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onSubmit, onError)}>
       <FormRow>
         <Label htmlFor="name">Cabin name</Label>
-        <Input type="text" id="name" {...register("name")} />
+        <Input
+          type="text"
+          id="name"
+          {...register("name", {
+            required: "Cabin name is required",
+          })}
+        />
       </FormRow>
 
       <FormRow>
         <Label htmlFor="max_capacity">Maximum capacity</Label>
-        <Input type="number" id="max_capacity" {...register("max_capacity")} />
+        <Input
+          type="number"
+          id="max_capacity"
+          {...register("max_capacity", {
+            required: "Maximum capacity is required",
+            min: { value: 1, message: "Capacity must be at least 1" },
+          })}
+        />
       </FormRow>
 
       <FormRow>
@@ -82,7 +104,10 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="regular_price"
-          {...register("regular_price")}
+          {...register("regular_price", {
+            required: "Regular price is required",
+            min: { value: 1, message: "Price must be greater than 0" },
+          })}
         />
       </FormRow>
 
@@ -91,7 +116,16 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="discount"
-          {...register("discount")}
+          {...register("discount", {
+            required: "If no discount, enter 0",
+            min: {
+              value: 0,
+              message: "If no discount, enter 0",
+              validate: (value) =>
+                value > getValues().regular_ ||
+                "Capacity cannot exceed regular price",
+            },
+          })}
           defaultValue={0}
         />
       </FormRow>
@@ -101,7 +135,9 @@ function CreateCabinForm() {
         <Textarea
           type="number"
           id="description"
-          {...register("description")}
+          {...register("description", {
+            required: "Description is required",
+          })}
           defaultValue=""
         />
       </FormRow>
