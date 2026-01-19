@@ -27,7 +27,7 @@ function CreateCabinForm() {
   });
 
   const onSubmit = (data) => {
-    mutate(data);
+    mutate({ ...data, image_link: data.image_link[0] });
   };
 
   const onError = (errors) => {
@@ -108,6 +108,7 @@ function CreateCabinForm() {
         <FileInput
           id="image_link"
           accept="image/*"
+          type="file"
           disabled={isCreating}
           {...register("image_link")}
         />
