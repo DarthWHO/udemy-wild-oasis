@@ -4,6 +4,8 @@ import { deleteCabin } from "../../services/apiCabins.js";
 import Button from "../../ui/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import CreateCabinForm from "./CreateCabinForm.jsx";
+import { useState } from "react";
 
 const TableRow = styled.div`
   display: grid;
@@ -45,6 +47,8 @@ const Discount = styled.div`
 `;
 
 function CabinRow({ cabin }) {
+  const [showEditForm, setShowEditForm] = useState(false);
+
   const {
     id: cabinId,
     image_link,
@@ -56,7 +60,7 @@ function CabinRow({ cabin }) {
 
   const queryClient = useQueryClient();
 
-  const { isPending: isDeleting, mutate } = useMutation({
+  const { isPending: isModifying, mutate } = useMutation({
     mutationFn: (id) => deleteCabin(id),
     onSuccess: () => {
       toast.success("Cabin deleted successfully");
@@ -68,16 +72,27 @@ function CabinRow({ cabin }) {
   });
 
   return (
-    <TableRow role="row">
-      <Img src={image_link} alt={name} />
-      <Cabin>{name}</Cabin>
-      <div>{`${max_capacity} guests`}</div>
-      <Price>{formatCurrency(regular_price)}</Price>
-      <Discount>{formatCurrency(discount)}</Discount>
-      <button onClick={() => mutate(cabinId)} disabled={isDeleting}>
-        {isDeleting ? "Deleting..." : "Delete"}
-      </button>
-    </TableRow>
+    <>
+      <TableRow role="row">
+        <Img src={image_link} alt={name} />
+        <Cabin>{name}</Cabin>
+        <div>{`${max_capacity} guests`}</div>
+        <Price>{formatCurrency(regular_price)}</Price>
+        <Discount>{formatCurrency(discount)}</Discount>
+        <div>
+          <button
+            onClick={() => setShowEditForm(!showEditForm)}
+            disabled={isModifying}
+          >
+            {isModifying ? "Editing..." : "Edit"}
+          </button>
+          <button onClick={() => mutate(cabinId)} disabled={isModifying}>
+            {isModifying ? "Deleting..." : "Delete"}
+          </button>
+        </div>
+      </TableRow>
+      {showEditForm && <CreateCabinForm cabinToEdit={cabin} />}
+    </>
   );
 }
 

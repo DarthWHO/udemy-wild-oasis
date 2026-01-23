@@ -1,5 +1,32 @@
 import supabase, { supabaseUrl } from "./supabase";
 
+const generateImageData = (imageFile) => {
+  if (typeof imageFile === "string") {
+    return { imageName: null, imageUrl: imageFile };
+  }
+
+  console.log("Generating image data for:", imageFile.name);
+
+  const randomNum = String(Math.random()).replace("0.", "");
+  const imageName = `${randomNum}-${imageFile.name}`.replaceAll("/", "");
+  const imageUrl = `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`;
+  return { imageName, imageUrl };
+};
+
+const uploadImage = async (imageName, id, imageLink) => {
+  console.log("Uploading image:", imageName, id, imageLink);
+  // const { error: storageError } = await supabase.storage
+  //   .from("cabin-images")
+  //   .upload(imageName, imageLink);
+
+  // if (storageError) {
+  //   await supabase.from("cabins").delete().eq("id", id);
+  //   throw new Error(
+  //     `Could not create cabin due to image - ${storageError.message}`,
+  //   );
+  // }
+};
+
 export const getCabins = async () => {
   const { data, error } = await supabase.from("cabins").select("*");
   if (error) {
@@ -18,10 +45,7 @@ export const deleteCabin = async (id) => {
 
 export const createCabin = async (cabin) => {
   // https://wioeoqkvzdrzynpavdvv.supabase.co/storage/v1/object/public/cabin-images/
-  const randomNum = String(Math.random()).replace("0.", "");
-  const imageName = `${randomNum}-${cabin.image_link.name}`.replaceAll("/", "");
-
-  const imageUrl = `${supabaseUrl}/storage/v1/object/public/cabin-images/${imageName}`;
+  const { imageName, imageUrl } = generateImageData(cabin.image_link);
 
   const { data, error } = await supabase
     .from("cabins")
@@ -31,15 +55,30 @@ export const createCabin = async (cabin) => {
     throw new Error(`Could not create cabin - ${error.message}`);
   }
 
-  const { error: storageError } = await supabase.storage
-    .from("cabin-images")
-    .upload(imageName, cabin.image_link);
-  if (storageError) {
-    await supabase.from("cabins").delete().eq("id", data.id);
-    throw new Error(
-      `Could not create cabin due to image - ${storageError.message}`,
-    );
+  await uploadImage(imageName, cabin.id, cabin.image_link);
+
+  return data;
+};
+
+export const editCabin = async (cabin, id) => {
+  console.log(cabin.image_link);
+  const { imageName, imageUrl } = generateImageData(cabin.image_link);
+  console.log("imageName:", imageName);
+  console.log("imageUrl:", imageUrl);
+
+  const { data, error } = await supabase
+    .from("cabins")
+    .update([{ ...cabin, image_link: imageUrl }])
+    .eq("id", id)
+    .select();
+  if (error) {
+    throw new Error(`Could not update cabin - ${error.message}`);
   }
+
+  //
+  // if (imageName) {
+  //   await uploadImage(imageName, id, cabin.image_link);
+  // }
 
   return data;
 };
