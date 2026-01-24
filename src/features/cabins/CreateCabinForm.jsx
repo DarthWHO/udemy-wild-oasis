@@ -46,13 +46,19 @@ function CreateCabinForm({ cabinToEdit = {} }) {
   const isPending = isCreating || isEditing;
 
   const onSubmit = (data) => {
+    if (typeof data.image_link !== "string") {
+      data.image_link = data.image_link[0];
+    }
+
     if (isEditMode) {
       mutateEditCabin({
         cabin: { ...data, image_link: data.image_link },
         id: editId,
       });
+      reset(data);
     } else {
       mutateCreateCabin({ ...data, image_link: data.image_link });
+      reset();
     }
   };
 
