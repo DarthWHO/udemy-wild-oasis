@@ -1,47 +1,24 @@
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import Input from "../../ui/Input";
 import Form from "../../ui/Form";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import FormRow from "../../ui/FormRow";
-import { createCabin, editCabin } from "../../services/apiCabins";
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
 
 function CreateCabinForm({ cabinToEdit = {} }) {
   const { id: editId, ...editData } = cabinToEdit;
+  const { createCabin, isCreating } = useCreateCabin();
+  const { editCabin, isEditing } = useEditCabin();
+
   const isEditMode = Boolean(editId);
 
   const { register, handleSubmit, reset, getValues, formState } = useForm({
     defaultValues: editData,
   });
   const { errors } = formState;
-  const queryClient = useQueryClient();
-
-  const { mutate: mutateCreateCabin, isPending: isCreating } = useMutation({
-    mutationFn: (cabin) => createCabin(cabin),
-    onSuccess: () => {
-      toast.success("Cabin created successfully");
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      reset();
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
-
-  const { mutate: mutateEditCabin, isPending: isEditing } = useMutation({
-    mutationFn: ({ cabin, id }) => editCabin(cabin, id),
-    onSuccess: () => {
-      toast.success("Cabin updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      reset();
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
 
   const isPending = isCreating || isEditing;
 
@@ -51,13 +28,13 @@ function CreateCabinForm({ cabinToEdit = {} }) {
     }
 
     if (isEditMode) {
-      mutateEditCabin({
+      editCabin({
         cabin: { ...data, image_link: data.image_link },
         id: editId,
       });
       reset(data);
     } else {
-      mutateCreateCabin({ ...data, image_link: data.image_link });
+      createCabin({ ...data, image_link: data.image_link });
       reset();
     }
   };
