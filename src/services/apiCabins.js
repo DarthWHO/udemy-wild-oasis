@@ -52,8 +52,9 @@ export const createCabin = async (cabin) => {
     throw new Error(`Could not create cabin - ${error.message}`);
   }
 
-  await uploadImage(imageName, cabin.id, cabin.image_link);
-
+  if (imageName) {
+    await uploadImage(imageName, cabin.id, cabin.image_link);
+  }
   return data;
 };
 
