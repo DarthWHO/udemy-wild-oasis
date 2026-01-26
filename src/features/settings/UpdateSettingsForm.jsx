@@ -17,7 +17,10 @@ function UpdateSettingsForm() {
 
   const handleUpdate = (e, field) => {
     const value = e.target.value;
+
+    if (value == settings[field]) return;
     if (!value) return;
+
     updateSettings({ [field]: value });
   };
 
